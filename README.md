@@ -18,16 +18,13 @@ A user should be assigned with the above role assigned within. I have created a 
 In this architecture I have created an S3 bucket name devopsbucket-demo to store artifacts and to pull out artifacts from there. The codebuild should have access to the s3.
 
 
-# Open DevOps_Task:
-Now here, Lets go to DevOps_Task -maain brach. and do as follows:
-
 # File Name: AWSCli.sh
-You will have to run the commands from the file names AWSCli.sh in aws cli before foing further. This will respectively create necessary resources for codepipelines.
+You will have to run the commands from the file names AWSCli.sh in aws cli before going further. This will respectively create necessary resources for codepipelines.
 The part:1 will create demoProject which we will be using in the pipeline. If you have any existing projects, simply just change the project names and values in the 4StagePipeline.yml file.
 
 The part:2 will create cloudformation stack to deploy the code respectively "deployECS.yml" and "4StagePipeline.yml." The deployECS.yml will create the necessary cluster which will be connected with the pipeline and 4StagePipeline will create a 4 stage code pipeline with manual approval for each stage and connected to github
 
-After this, go to Deploy.
+After this, go to Deploy directory.
 
 # File Name: deplouECS.yml
 This file is to be deployed through aws cli following the #AWSCli.sh commands.
@@ -44,4 +41,7 @@ Now go to the directory named Terraform. This could be done in 2 ways. This can 
  2. terraform plan
  3. terraform apply.
 
- terraform apply will deploy the terraform script into the target area.
+ terraform apply will deploy the terraform script into the target area.v
+ I had to delete some planning file from this directory because github repo cannot publish a repo size greater than 100.
+
+ # Thank you !! I really appreciate your patience.
