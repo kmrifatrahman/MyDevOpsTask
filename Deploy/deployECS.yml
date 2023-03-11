@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  MyCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: MyEcsCluster
+
+  MyTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: MyTaskFamily
+      ContainerDefinitions:
+        - Name: MyContainer
+          Image: nginx:latest
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 80
+
+  MyLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: MyLoadBalancer
+
+      Subnets:
+        - subnet-064b949dc1b4a49c5  # Replace with the ID of your subnet
+        - subnet-0e05ff56ae854e964  # Replace with the ID of your subnet
+      SecurityGroups:
+        - sg-03991a4a04f7e82a3  # Replace with the ID of your security group
+      Type: application
+      Tags:
+        - Key: Name
+          Value: MyLoadBalancer
+
+  MyTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: MyTargetGroup
+      Port: 80
+      Protocol: HTTP
+      VpcId: vpc-0158f22b65cb1d60f
+      TargetType: instance
+      Tags:
+        - Key: Name
+          Value: MyTargetGroup
+
+  MyListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MyLoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyTargetGroup

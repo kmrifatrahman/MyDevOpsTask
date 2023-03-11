@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+
+  MyService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: arn:aws:ecs:us-east-2:860632841866:cluster/MyEcsCluster
+      ServiceName: MyEcsService
+      TaskDefinition: arn:aws:ecs:us-east-2:860632841866:task-definition/MyTaskFamily:14
+      DesiredCount: 2
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 50
+        MaximumPercent: 200
+      LoadBalancers:
+        - TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:860632841866:targetgroup/MyTargetGroup/6465bb6683bdcc64
+          ContainerName: MyContainer
+          ContainerPort: 80
+
+  MyPipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: MyPipelinePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                  - s3:ListAllMyBuckets
+                  - s3:ListBucket
+                  - s3:PutObject
+                Resource:
+                  - arn:aws:s3:::devopsbucket-demo
+                  - arn:aws:s3:::devopsbucket-demo/*
+
+  MyPipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: "MyPipeline"
+      RoleArn: !GetAtt MyPipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: devopsbucket-demo
+      Stages:
+        - Name: "Source"
+          Actions:
+            - Name: "Source"
+              ActionTypeId:
+                Category: "Source"
+                Owner: "ThirdParty"
+                Provider: "GitHub"
+                Version: "1"
+              Configuration:
+                Owner: "kmrifatrahman"
+                Repo: "kmrifatrahman/MyWeb"
+                Branch: "main"
+                OAuthToken: "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" # Required for private repositories
+              OutputArtifacts:
+                - Name: "source-output"
+              RunOrder: 1
+        - Name: "Dev"
+          Actions:
+            - Name: "DevApproval"
+              ActionTypeId:
+                Category: "Approval"
+                Owner: "AWS"
+                Provider: "Manual"
+                Version: "1"
+              RunOrder: 1
+            - Name: "devopsbucket-demo"
+              ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Provider: "CodeBuild"
+                Version: "1"
+              InputArtifacts:
+                - Name: "source-output"
+              OutputArtifacts:
+                - Name: "dev-output"
+              Configuration:
+                ProjectName: "MyProject"
+                PrimarySource: "source-output"
+              RunOrder: 2
+        - Name: "QA"
+          Actions:
+            - Name: "QAApproval"
+              ActionTypeId:
+                Category: "Approval"
+                Owner: "AWS"
+                Provider: "Manual"
+                Version: "1"
+              RunOrder: 3
+        - Name: "UAT"
+          Actions:
+            - Name: "Test"
+              ActionTypeId:
+                Category: "Approval"
+                Owner: AWS
+                Provider: "Manual"
+                Version: '1'
+              Configuration:
+                CustomData: "MyApp-Test"
+              RunOrder: 4
+
+        - Name: "Prod"
+          Actions:
+            - Name: "Deploy"
+              ActionTypeId:
+                Category: "Deploy"
+                Owner: "AWS"
+                Provider: "ECS"
+                Version: "1"
+              Configuration:
+                ClusterName: "MyEcsCluster"
+                ServiceName: "MyEcsService"
+                FileName: "imagedefinitions.json"
+              InputArtifacts:
+                - Name: "Prod-output"
+              RunOrder: 5
+
+
+
+
+
+
+## All projects name are from existing project
+
