@@ -41,7 +41,7 @@ Now go to the directory named Terraform. This could be done in 2 ways. This can 
  2. terraform plan
  3. terraform apply.
 
- terraform apply will deploy the terraform script into the target area.v
+ terraform apply will deploy the terraform script { file name : Sample2.tf } into the target area.v
  I had to delete some planning file from this directory because github repo cannot publish a repo size greater than 100.
 
  # Thank you !! I really appreciate your patience.
