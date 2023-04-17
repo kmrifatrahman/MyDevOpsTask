@@ -26,7 +26,7 @@ The part:2 will create cloudformation stack to deploy the code respectively "dep
 
 After this, go to Deploy directory.
 
-# File Name: deplouECS.yml
+# File Name: deployECS.yml
 This file is to be deployed through aws cli following the #AWSCli.sh commands.
 This will create the necessary cluster with proper loadbalancer and target group.
 
